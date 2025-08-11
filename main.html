@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Data Entry Wizard</title>
+    <style>
+        /* Artistic and Functional CSS */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #81C784;
+            --background-color: #e8f5e9;
+            --card-background: #ffffff;
+            --text-color: #333;
+            --placeholder-color: #aaa;
+            --border-color: #ddd;
+            --shadow: 0 8px 30px rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.8;
+            background-color: var(--background-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .wizard-container {
+            background: var(--card-background);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 800px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            font-weight: 600;
+        }
+
+        h2, h3, h4 {
+            color: var(--text-color);
+            font-weight: 400;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 40px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 5px;
+            transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .step {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .form-group.radio-group, .form-group.radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .radio-group label, .radio-group label {
+            display: flex;
+            align-items: center;
+            font-weight: 400;
+            margin-bottom: 0;
+            cursor: pointer;
+        }
+
+        .radio-group input[type="radio"], .radio-group input[type="radio"] {
+            width: auto;
+            margin-right: 8px;
+        }
+
+        input[type="text"], input[type="date"], input[type="email"], input[type="tel"], select, input[type="number"] {
+            width: 100%;
+            padding: 14px 18px;
+            box-sizing: border-box;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            color: var(--text-color);
+            background-color: #f8f9fa;
+        }
+
+        input::placeholder {
+            color: var(--placeholder-color);
+        }
+
+        input[type="text"]:focus, input[type="date"]:focus, input[type="email"]:focus, input[type="tel"]:focus, select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(76, 175, 80, 0.15);
+            background-color: #fff;
+        }
+
+        .button-group {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .button-group button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .button-group .prev {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .button-group .prev:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .button-group .next, .button-group .submit {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .button-group .next:hover, .button-group .submit:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.25);
+        }
+        
+        .multi-entry-block, .sub-section-block {
+            border: 1px dashed var(--border-color);
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 20px;
+            position: relative;
+            transition: all 0.3s ease;
+            background-color: #fcfcfc;
+        }
+
+        .multi-entry-block:hover, .sub-section-block:hover {
+            background-color: #f9f9f9;
+        }
+
+        .sub-section-block h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .add-more-btn, .remove-btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            margin-top: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .add-more-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .add-more-btn:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .remove-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+        .remove-btn:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        #reviewData {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 25px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Courier New', Courier, monospace;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .required-label::after {
+            content: '*';
+            color: #dc3545;
+            margin-left: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .wizard-container {
+                padding: 20px;
+            }
+            .button-group {
+                flex-direction: column;
+            }
+            .button-group button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="wizard-container">
+        <h1>User Data Entry Wizard</h1>
+        <p>A dynamic, step-by-step form to simplify complex data entry.</p>
+
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <form id="dataEntryForm" novalidate>
+
+            <!-- Step 1: Personal Information -->
+            <div id="step-1" class="step active">
+                <h2>Step 1: Personal and Contact Information</h2>
+                <p>Please provide your basic personal details and contact information. Fields marked with an asterisk (*) are required.</p>
+                <div class="form-group">
+                    <label for="first_name" class="required-label">First Name</label>
+                    <input type="text" id="first_name" name="first_name" required>
+                </div>
+                <div class="form-group">
+                    <label for="middle_name">Middle Name</label>
+                    <input type="text" id="middle_name" name="middle_name">
+                </div>
+                <div class="form-group">
+                    <label for="last_name" class="required-label">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" required>
+                </div>
+
+                <!-- Birth Name Question -->
+                <div class="form-group">
+                    <h3>Do you have a different legal name at birth than your current name?</h3>
+                    <div class="radio-group">
+                        <label><input type="radio" name="has_different_birth_name" value="yes"> Yes</label>
+                        <label><input type="radio" name="has_different_birth_name" value="no" checked> No</label>
+                    </div>
+                </div>
+
+                <!-- Birth Name Section - Initially hidden or auto-filled -->
+                <div id="birthNameSection" class="sub-section-block hidden">
+                    <h3>Birth Name</h3>
+                    <p>Enter your legal name at birth, if different from your current name. This section is pre-filled if you answered 'No' above.</p>
+                    <div class="form-group">
+                        <label for="birth_first_name">First Name</label>
+                        <input type="text" id="birth_first_name" name="birth_first_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="birth_middle_name">Middle Name</label>
+                        <input type="text" id="birth_middle_name" name="birth_middle_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="birth_last_name">Last Name</label>
+                        <input type="text" id="birth_last_name" name="birth_last_name">
+                    </div>
+                </div>
+
+                <!-- Other Names Question -->
+                <div class="form-group">
+                    <h3>Do you have any other names (such as maiden names or aliases)?</h3>
+                    <div class="radio-group">
+                        <label><input type="radio" name="has_other_names" value="yes"> Yes</label>
+                        <label><input type="radio" name="has_other_names" value="no" checked> No</label>
+                    </div>
+                </div>
+
+                <!-- Other Names Section - Initially hidden -->
+                <div id="otherNamesSection" class="sub-section-block hidden">
+                    <h3>Other Name 1</h3>
+                    <p>List any other names you have used, such as maiden names or aliases.</p>
+                    <div class="form-group">
+                        <label for="other_first_name1">First Name</label>
+                        <input type="text" id="other_first_name1" name="other_first_name1">
+                    </div>
+                    <div class="form-group">
+                        <label for="other_middle_name1">Middle Name</label>
+                        <input type="text" id="other_middle_name1" name="other_middle_name1">
+                    </div>
+                    <div class="form-group">
+                        <label for="other_last_name1">Last Name</label>
+                        <input type="text" id="other_last_name1" name="other_last_name1">
+                    </div>
+
+                    <h3>Other Name 2</h3>
+                    <p>Another field for additional names, if applicable.</p>
+                    <div class="form-group">
+                        <label for="other_first_name2">First Name</label>
+                        <input type="text" id="other_first_name2" name="other_first_name2">
+                    </div>
+                    <div class="form-group">
+                        <label for="other_middle_name2">Middle Name</label>
+                        <input type="text" id="other_middle_name2" name="other_middle_name2">
+                    </div>
+                    <div class="form-group">
+                        <label for="other_last_name2">Last Name</label>
+                        <input type="text" id="other_last_name2" name="other_last_name2">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="date_of_birth" class="required-label">Date of Birth</label>
+                    <input type="date" id="date_of_birth" name="date_of_birth" required>
+                </div>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <input type="text" id="gender" name="gender">
+                </div>
+                
+                <div class="form-group">
+                    <label for="marital_status" class="required-label">Marital Status</label>
+                    <select id="marital_status" name="marital_status" required>
+                        <option value="">Select...</option>
+                        <option value="single">Single</option>
+                        <option value="married">Married</option>
+                        <option value="divorced">Divorced</option>
+                        <option value="widowed">Widowed</option>
+                        <option value="annulled">Annulled</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="fax_number">Fax Number</label>
+                    <input type="tel" id="fax_number" name="fax_number">
+                </div>
+                <div class="form-group">
+                    <label for="mobile_phone_number">Mobile Phone Number</label>
+                    <input type="tel" id="mobile_phone_number" name="mobile_phone_number">
+                </div>
+                <div class="form-group">
+                    <label for="evening_phone_number">Evening Phone Number</label>
+                    <input type="tel" id="evening_phone_number" name="evening_phone_number">
+                </div>
+                <div class="form-group">
+                    <label for="work_phone_number">Work Phone Number</label>
+                    <input type="tel" id="work_phone_number" name="work_phone_number">
+                </div>
+                
+                <div class="form-group">
+                    <label for="ethnicity">Ethnicity</label>
+                    <input type="text" id="ethnicity" name="ethnicity">
+                </div>
+                <div class="form-group">
+                    <label for="hair_color">Hair Color</label>
+                    <input type="text" id="hair_color" name="hair_color">
+                </div>
+                <div class="form-group">
+                    <label for="eye_color">Eye Color</label>
+                    <input type="text" id="eye_color" name="eye_color">
+                </div>
+                
+                <h3>Race</h3>
+                <p>Select all races that apply.</p>
+                <div class="form-group radio-group">
+                    <label><input type="radio" name="race_white" value="true"> White</label>
+                    <label><input type="radio" name="race_asian" value="true"> Asian</label>
+                    <label><input type="radio" name="race_black" value="true"> Black or African American</label>
+                    <label><input type="radio" name="race_american_indian" value="true"> American Indian or Alaska Native</label>
+                    <label><input type="radio" name="race_native_hawaiian" value="true"> Native Hawaiian or Other Pacific Islander</label>
+                </div>
+
+                <div class="form-group">
+                    <label for="country_of_birth">Country of Birth</label>
+                    <input type="text" id="country_of_birth" name="country_of_birth">
+                </div>
+                <div class="form-group">
+                    <label for="country_of_nationality">Country of Nationality</label>
+                    <input type="text" id="country_of_nationality" name="country_of_nationality">
+                </div>
+
+                <div class="form-group">
+                    <label for="citizenship_country">Country of Citizenship</label>
+                    <input type="text" id="citizenship_country" name="citizenship_country">
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="next">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Marital & Spouse's Personal Information -->
+            <div id="step-2" class="step">
+                <h2>Step 2: Marital and Spouse Information</h2>
+                <p>Provide details about your marital history. The sections below will appear or hide based on your marital status and the number of times you've been married.</p>
+                <div id="maritalInfoSection">
+                    <div class="form-group">
+                        <label for="times_married">Times Married</label>
+                        <input type="number" id="times_married" name="times_married" min="0" placeholder="e.g., 1 for current marriage, 2 for current and one prior">
+                        <span id="times_married_error" class="error-message hidden">Times married cannot be 0 if your marital status is not single.</span>
+                    </div>
+
+                    <!-- Current Spouse Information -->
+                    <div id="currentSpouseSection" class="sub-section-block hidden">
+                        <h3>Current Spouse Information</h3>
+                        <p>Complete this section if your marital status is 'Married'.</p>
+                        <div class="form-group">
+                            <label for="current_spouse_first_name">First Name</label>
+                            <input type="text" id="current_spouse_first_name" name="current_spouse_first_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_middle_name">Middle Name</label>
+                            <input type="text" id="current_spouse_middle_name" name="current_spouse_middle_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_last_name">Last Name</label>
+                            <input type="text" id="current_spouse_last_name" name="current_spouse_last_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_previous_last_name">Previous Last Name (if applicable)</label>
+                            <input type="text" id="current_spouse_previous_last_name" name="current_spouse_previous_last_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_previous_middle_name">Previous Middle Name (if applicable)</label>
+                            <input type="text" id="current_spouse_previous_middle_name" name="current_spouse_previous_middle_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_previous_first_name">Previous First Name (if applicable)</label>
+                            <input type="text" id="current_spouse_previous_first_name" name="current_spouse_previous_first_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_other_last_name">Other Last Name</label>
+                            <input type="text" id="current_spouse_other_last_name" name="current_spouse_other_last_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_other_middle_name">Other Middle Name</label>
+                            <input type="text" id="current_spouse_other_middle_name" name="current_spouse_other_middle_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_other_first_name">Other First Name</label>
+                            <input type="text" id="current_spouse_other_first_name" name="current_spouse_other_first_name">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_date_of_birth">Date of Birth</label>
+                            <input type="date" id="current_spouse_date_of_birth" name="current_spouse_date_of_birth">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_marriage_date">Marriage Date</label>
+                            <input type="date" id="current_spouse_marriage_date" name="current_spouse_marriage_date">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_address_street">Address Street</label>
+                            <input type="text" id="current_spouse_address_street" name="current_spouse_address_street">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_address_extra">Address Extra (e.g., Apt, Suite, Bldg)</label>
+                            <input type="text" id="current_spouse_address_extra" name="current_spouse_address_extra">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_address_number">Address Number</label>
+                            <input type="text" id="current_spouse_address_number" name="current_spouse_address_number">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_address_city">Address City</label>
+                            <input type="text" id="current_spouse_address_city" name="current_spouse_address_city">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_address_county">Address County</label>
+                            <input type="text" id="current_spouse_address_county" name="current_spouse_address_county">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_address_state">Address State</label>
+                            <input type="text" id="current_spouse_address_state" name="current_spouse_address_state">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_address_zip_code">Address Zip Code</label>
+                            <input type="text" id="current_spouse_address_zip_code" name="current_spouse_address_zip_code">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_address_province">Address Province</label>
+                            <input type="text" id="current_spouse_address_province" name="current_spouse_address_province">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_address_postal_code">Address Postal Code</label>
+                            <input type="text" id="current_spouse_address_postal_code" name="current_spouse_address_postal_code">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_address_country">Address Country</label>
+                            <input type="text" id="current_spouse_address_country" name="current_spouse_address_country">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_employer">Employer</label>
+                            <input type="text" id="current_spouse_employer" name="current_spouse_employer">
+                        </div>
+                        <div class="form-group radio-group">
+                            <label><input type="radio" name="current_spouse_citizen" value="true"> Citizen</label>
+                            <label><input type="radio" name="current_spouse_citizen_at_birth" value="true"> Citizen at Birth</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_date_became_citizen">Date Became Citizen</label>
+                            <input type="date" id="current_spouse_date_became_citizen" name="current_spouse_date_became_citizen">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_country_of_citizenship">Country of Citizenship</label>
+                            <input type="text" id="current_spouse_country_of_citizenship" name="current_spouse_country_of_citizenship">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_a_number">A-Number</label>
+                            <input type="text" id="current_spouse_a_number" name="current_spouse_a_number" placeholder="Enter '1' if married once, or >1 if married more than once.">
+                            <span id="current_spouse_a_number_error" class="error-message hidden"></span>
+                        </div>
+                        <div class="form-group radio-group">
+                            <label><input type="radio" name="current_spouse_lawful_permanent_resident" value="true"> Lawful Permanent Resident</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_immigration_status_other">Immigration Status Other</label>
+                            <input type="text" id="current_spouse_immigration_status_other" name="current_spouse_immigration_status_other">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="current_spouse_times_married">Current Spouse's Times Married</label>
+                            <input type="number" id="current_spouse_times_married" name="current_spouse_times_married" min="1" value="1" placeholder="Defaults to 1 for current spouse, or enter more if applicable.">
+                            <span id="current_spouse_times_married_error" class="error-message hidden">Current spouse's times married must be at least 1.</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_marriage_address_city">Marriage Address City</label>
+                            <input type="text" id="current_spouse_marriage_address_city" name="current_spouse_marriage_address_city">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_marriage_address_state">Marriage Address State</label>
+                            <input type="text" id="current_spouse_marriage_address_state" name="current_spouse_marriage_address_state">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_marriage_address_province">Marriage Address Province</label>
+                            <input type="text" id="current_spouse_marriage_address_province" name="current_spouse_marriage_address_province">
+                        </div>
+                        <div class="form-group">
+                            <label for="current_spouse_marriage_address_country">Marriage Address Country</label>
+                            <input type="text" id="current_spouse_marriage_address_country" name="current_spouse_marriage_address_country">
+                        </div>
+
+                        <!-- Current Spouse's Prior Spouses -->
+                        <div id="currentSpousePriorSpouseBlocks" class="sub-section-block">
+                            <h4>Current Spouse's Prior Spouses</h4>
+                            <p>List any prior spouses of your current spouse. If none, you can ignore this section.</p>
+                            <div class="multi-entry-block" data-multi-entry="current_spouse_prior_spouses" data-block-template="current_spouse_prior_spouse">
+                                <h5>Prior Spouse #1 (of Current Spouse)</h5>
+                                <div class="form-group">
+                                    <label for="current_spouse_prior_spouse_first_name_1">First Name</label>
+                                    <input type="text" id="current_spouse_prior_spouse_first_name_1" name="current_spouse_prior_spouse_first_name_1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="current_spouse_prior_spouse_middle_name_1">Middle Name</label>
+                                    <input type="text" id="current_spouse_prior_spouse_middle_name_1" name="current_spouse_prior_spouse_middle_name_1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="current_spouse_prior_spouse_last_name_1">Last Name</label>
+                                    <input type="text" id="current_spouse_prior_spouse_last_name_1" name="current_spouse_prior_spouse_last_name_1">
+                                </div>
+                                <div class="form-group radio-group">
+                                    <label><input type="radio" name="current_spouse_prior_spouse_citizen_1" value="true"> Citizen</label>
+                                    <label><input type="radio" name="current_spouse_prior_spouse_lawful_permanent_resident_1" value="true"> Lawful Permanent Resident</label>
+                                </div>
+                                <div class="form-group">
+                                    <label for="current_spouse_prior_spouse_immigration_status_other_1">Immigration Status Other</label>
+                                    <input type="text" id="current_spouse_prior_spouse_immigration_status_other_1" name="current_spouse_prior_spouse_immigration_status_other_1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="current_spouse_prior_spouse_date_of_birth_1">Date of Birth</label>
+                                    <input type="date" id="current_spouse_prior_spouse_date_of_birth_1" name="current_spouse_prior_spouse_date_of_birth_1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="current_spouse_prior_spouse_country_of_birth_1">Country of Birth</label>
+                                    <input type="text" id="current_spouse_prior_spouse_country_of_birth_1" name="current_spouse_prior_spouse_country_of_birth_1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="current_spouse_prior_spouse_country_of_citizenship_1">Country of Citizenship</label>
+                                    <input type="text" id="current_spouse_prior_spouse_country_of_citizenship_1" name="current_spouse_prior_spouse_country_of_citizenship_1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="current_spouse_prior_spouse_date_of_marriage_1">Date of Marriage</label>
+                                    <input type="date" id="current_spouse_prior_spouse_date_of_marriage_1" name="current_spouse_prior_spouse_date_of_marriage_1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="current_spouse_prior_spouse_end_date_of_marriage_1">End Date of Marriage</label>
+                                    <input type="date" id="current_spouse_prior_spouse_end_date_of_marriage_1" name="current_spouse_prior_spouse_end_date_of_marriage_1">
+                                </div>
+                                <div class="form-group radio-group">
+                                    <label><input type="radio" name="current_spouse_prior_spouse_annuled_1" value="true" class="prior-spouse-annuled"> Annulled</label>
+                                    <label><input type="radio" name="current_spouse_prior_spouse_divorced_1" value="true" class="prior-spouse-divorced"> Divorced</label>
+                                    <label><input type="radio" name="current_spouse_prior_spouse_deceased_1" value="true" class="prior-spouse-deceased"> Deceased</label>
+                                </div>
+                                <div class="form-group">
+                                    <label for="current_spouse_prior_spouse_marriage_end_other_1">Marriage End Other</label>
+                                    <input type="text" id="current_spouse_prior_spouse_marriage_end_other_1" name="current_spouse_prior_spouse_marriage_end_other_1">
+                                </div>
+                                <button type="button" class="remove-btn hidden">Remove Prior Spouse</button>
+                            </div>
+                            <button type="button" class="add-more-btn" id="addCurrentSpousePriorSpouseBtn" data-target="currentSpousePriorSpouseBlocks" data-block-id="current_spouse_prior_spouses" data-label-prefix="Prior Spouse" data-label-suffix="(of Current Spouse)">Add another Prior Spouse (of Current Spouse)</button>
+                        </div>
+                    </div>
+
+                    <!-- Prior Spouses (of Self) -->
+                    <div id="selfPriorSpouseSection" class="sub-section-block hidden">
+                        <h3>Your Prior Spouses</h3>
+                        <p>List any of your prior spouses. This section appears if you've been married more than once, or if you are divorced, widowed, or annulled.</p>
+                        <div class="multi-entry-block" data-multi-entry="prior_spouses" data-block-template="prior_spouse">
+                            <h5>Prior Spouse #1</h5>
+                            <div class="form-group">
+                                <label for="prior_spouse_first_name_1">First Name</label>
+                                <input type="text" id="prior_spouse_first_name_1" name="prior_spouse_first_name_1">
+                            </div>
+                            <div class="form-group">
+                                <label for="prior_spouse_middle_name_1">Middle Name</label>
+                                <input type="text" id="prior_spouse_middle_name_1" name="prior_spouse_middle_name_1">
+                            </div>
+                            <div class="form-group">
+                                <label for="prior_spouse_last_name_1">Last Name</label>
+                                <input type="text" id="prior_spouse_last_name_1" name="prior_spouse_last_name_1">
+                            </div>
+                            <div class="form-group radio-group">
+                                <label><input type="radio" name="prior_spouse_annuled_1" value="true" class="prior-spouse-annuled"> Annulled</label>
+                                <label><input type="radio" name="prior_spouse_divorced_1" value="true" class="prior-spouse-divorced"> Divorced</label>
+                                <label><input type="radio" name="prior_spouse_deceased_1" value="true" class="prior-spouse-deceased"> Deceased</label>
+                            </div>
+                            <div class="form-group">
+                                <label for="prior_spouse_immigration_status_other_1">Immigration Status Other</label>
+                                <input type="text" id="prior_spouse_immigration_status_other_1" name="prior_spouse_immigration_status_other_1">
+                            </div>
+                            <div class="form-group">
+                                <label for="prior_spouse_date_of_birth_1">Date of Birth</label>
+                                <input type="date" id="prior_spouse_date_of_birth_1" name="prior_spouse_date_of_birth_1">
+                            </div>
+                            <div class="form-group">
+                                <label for="prior_spouse_country_of_birth_1">Country of Birth</label>
+                                <input type="text" id="prior_spouse_country_of_birth_1" name="prior_spouse_country_of_birth_1">
+                            </div>
+                            <div class="form-group">
+                                <label for="prior_spouse_country_of_citizenship_1">Country of Citizenship</label>
+                                <input type="text" id="prior_spouse_country_of_citizenship_1" name="prior_spouse_country_of_citizenship_1">
+                            </div>
+                            <div class="form-group">
+                                <label for="prior_spouse_date_of_marriage_1">Date of Marriage</label>
+                                <input type="date" id="prior_spouse_date_of_marriage_1" name="prior_spouse_date_of_marriage_1">
+                            </div>
+                            <div class="form-group">
+                                <label for="prior_spouse_end_date_of_marriage_1">End Date of Marriage</label>
+                                <input type="date" id="prior_spouse_end_date_of_marriage_1" name="prior_spouse_end_date_of_marriage_1">
+                            </div>
+                            <div class="form-group radio-group">
+                                <label><input type="radio" name="prior_spouse_annuled_1" value="true" class="prior-spouse-annuled"> Annulled</label>
+                                <label><input type="radio" name="prior_spouse_divorced_1" value="true" class="prior-spouse-divorced"> Divorced</label>
+                                <label><input type="radio" name="prior_spouse_deceased_1" value="true" class="prior-spouse-deceased"> Deceased</label>
+                            </div>
+                            <div class="form-group">
+                                <label for="prior_spouse_marriage_end_other_1">Marriage End Other</label>
+                                <input type="text" id="prior_spouse_marriage_end_other_1" name="prior_spouse_marriage_end_other_1">
+                            </div>
+                            <button type="button" class="remove-btn hidden">Remove Prior Spouse</button>
+                        </div>
+                        <button type="button" class="add-more-btn" id="addSelfPriorSpouseBtn" data-target="selfPriorSpouseSection" data-block-id="prior_spouses" data-label-prefix="Prior Spouse">Add another Prior Spouse</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="prev">Previous</button>
+                    <button type="button" class="next">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Professional & Education Information -->
+            <div id="step-3" class="step">
+                <h2>Step 3: Professional or Education History</h2>
+                <p>Please provide details for up to three employers or educational institutions. All fields in each section must be shown.</p>
+
+                <!-- Employer/School #1 -->
+                <div class="sub-section-block">
+                    <h4>Employer/School #1</h4>
+                    <div class="form-group">
+                        <label for="employer_or_school_1_name">Name</label>
+                        <input type="text" id="employer_or_school_1_name" name="employer_or_school_1_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_1_occupation">Occupation</label>
+                        <input type="text" id="employer_or_school_1_occupation" name="employer_or_school_1_occupation">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_1_address_street">Address Street</label>
+                        <input type="text" id="employer_or_school_1_address_street" name="employer_or_school_1_address_street">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_1_address_extra">Address Extra (e.g., Apt, Suite, Bldg)</label>
+                        <input type="text" id="employer_or_school_1_address_extra" name="employer_or_school_1_address_extra">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_1_address_number">Address Number</label>
+                        <input type="text" id="employer_or_school_1_address_number" name="employer_or_school_1_address_number">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_1_address_city">Address City</label>
+                        <input type="text" id="employer_or_school_1_address_city" name="employer_or_school_1_address_city">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_1_address_state">Address State</label>
+                        <input type="text" id="employer_or_school_1_address_state" name="employer_or_school_1_address_state">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_1_address_zip_code">Address Zip Code</label>
+                        <input type="text" id="employer_or_school_1_address_zip_code" name="employer_or_school_1_address_zip_code">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_1_address_zip_4">Address Zip +4 (Optional)</label>
+                        <input type="text" id="employer_or_school_1_address_zip_4" name="employer_or_school_1_address_zip_4">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_1_address_province">Address Province</label>
+                        <input type="text" id="employer_or_school_1_address_province" name="employer_or_school_1_address_province">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_1_address_postal_code">Address Postal Code</label>
+                        <input type="text" id="employer_or_school_1_address_postal_code" name="employer_or_school_1_address_postal_code">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_1_address_country">Address Country</label>
+                        <input type="text" id="employer_or_school_1_address_country" name="employer_or_school_1_address_country">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_1_address_start_date">Start Date</label>
+                        <input type="date" id="employer_or_school_1_address_start_date" name="employer_or_school_1_address_start_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_1_address_end_date">End Date</label>
+                        <input type="date" id="employer_or_school_1_address_end_date" name="employer_or_school_1_address_end_date">
+                    </div>
+                </div>
+
+                <!-- Employer/School #2 -->
+                <div class="sub-section-block">
+                    <h4>Employer/School #2</h4>
+                    <div class="form-group">
+                        <label for="employer_or_school_2_name">Name</label>
+                        <input type="text" id="employer_or_school_2_name" name="employer_or_school_2_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_2_occupation">Occupation</label>
+                        <input type="text" id="employer_or_school_2_occupation" name="employer_or_school_2_occupation">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_2_address_street">Address Street</label>
+                        <input type="text" id="employer_or_school_2_address_street" name="employer_or_school_2_address_street">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_2_address_extra">Address Extra (e.g., Apt, Suite, Bldg)</label>
+                        <input type="text" id="employer_or_school_2_address_extra" name="employer_or_school_2_address_extra">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_2_address_number">Address Number</label>
+                        <input type="text" id="employer_or_school_2_address_number" name="employer_or_school_2_address_number">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_2_address_city">Address City</label>
+                        <input type="text" id="employer_or_school_2_address_city" name="employer_or_school_2_address_city">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_2_address_state">Address State</label>
+                        <input type="text" id="employer_or_school_2_address_state" name="employer_or_school_2_address_state">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_2_address_zip_code">Address Zip Code</label>
+                        <input type="text" id="employer_or_school_2_address_zip_code" name="employer_or_school_2_address_zip_code">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_2_address_zip_4">Address Zip +4 (Optional)</label>
+                        <input type="text" id="employer_or_school_2_address_zip_4" name="employer_or_school_2_address_zip_4">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_2_address_province">Address Province</label>
+                        <input type="text" id="employer_or_school_2_address_province" name="employer_or_school_2_address_province">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_2_address_postal_code">Address Postal Code</label>
+                        <input type="text" id="employer_or_school_2_address_postal_code" name="employer_or_school_2_address_postal_code">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_2_address_country">Address Country</label>
+                        <input type="text" id="employer_or_school_2_address_country" name="employer_or_school_2_address_country">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_2_address_start_date">Start Date</label>
+                        <input type="date" id="employer_or_school_2_address_start_date" name="employer_or_school_2_address_start_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_2_address_end_date">End Date</label>
+                        <input type="date" id="employer_or_school_2_address_end_date" name="employer_or_school_2_address_end_date">
+                    </div>
+                </div>
+
+                <!-- Employer/School #3 -->
+                <div class="sub-section-block">
+                    <h4>Employer/School #3</h4>
+                    <div class="form-group">
+                        <label for="employer_or_school_3_name">Name</label>
+                        <input type="text" id="employer_or_school_3_name" name="employer_or_school_3_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_3_occupation">Occupation</label>
+                        <input type="text" id="employer_or_school_3_occupation" name="employer_or_school_3_occupation">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_3_address_street">Address Street</label>
+                        <input type="text" id="employer_or_school_3_address_street" name="employer_or_school_3_address_street">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_3_address_extra">Address Extra (e.g., Apt, Suite, Bldg)</label>
+                        <input type="text" id="employer_or_school_3_address_extra" name="employer_or_school_3_address_extra">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_3_address_number">Address Number</label>
+                        <input type="text" id="employer_or_school_3_address_number" name="employer_or_school_3_address_number">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_3_address_city">Address City</label>
+                        <input type="text" id="employer_or_school_3_address_city" name="employer_or_school_3_address_city">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_3_address_state">Address State</label>
+                        <input type="text" id="employer_or_school_3_address_state" name="employer_or_school_3_address_state">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_3_address_zip_code">Address Zip Code</label>
+                        <input type="text" id="employer_or_school_3_address_zip_code" name="employer_or_school_3_address_zip_code">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_3_address_zip_4">Address Zip +4 (Optional)</label>
+                        <input type="text" id="employer_or_school_3_address_zip_4" name="employer_or_school_3_address_zip_4">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_3_address_province">Address Province</label>
+                        <input type="text" id="employer_or_school_3_address_province" name="employer_or_school_3_address_province">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_3_address_postal_code">Address Postal Code</label>
+                        <input type="text" id="employer_or_school_3_address_postal_code" name="employer_or_school_3_address_postal_code">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_3_address_country">Address Country</label>
+                        <input type="text" id="employer_or_school_3_address_country" name="employer_or_school_3_address_country">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_3_address_start_date">Start Date</label>
+                        <input type="date" id="employer_or_school_3_address_start_date" name="employer_or_school_3_address_start_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="employer_or_school_3_address_end_date">End Date</label>
+                        <input type="date" id="employer_or_school_3_address_end_date" name="employer_or_school_3_address_end_date">
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="prev">Previous</button>
+                    <button type="button" class="next">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Review and Save -->
+            <div id="step-4" class="step">
+                <h2>Step 4: Review and Save</h2>
+                <p>Review your entered data. Click "Save as JSON" to download your data file.</p>
+                <pre id="reviewData"></pre>
+                <div class="button-group">
+                    <button type="button" class="prev">Previous</button>
+                    <button type="submit" class="submit">Save as JSON</button>
+                </div>
+                <div id="saveConfirmation" style="text-align: center; margin-top: 20px; color: var(--primary-color); font-weight: 600;" class="hidden">
+                    Data saved successfully! 🎉
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('dataEntryForm');
+        const steps = document.querySelectorAll('.step');
+        const progressBar = document.getElementById('progressBar');
+        const reviewData = document.getElementById('reviewData');
+        const numSteps = steps.length;
+        let currentStep = 0;
+
+        // Step 1 marital status element
+        const maritalStatusSelect = document.getElementById('marital_status');
+        // Step 3 marital info sections
+        const maritalInfoSection = document.getElementById('maritalInfoSection');
+        const timesMarriedInput = document.getElementById('times_married');
+        const timesMarriedError = document.getElementById('times_married_error');
+        const currentSpouseSection = document.getElementById('currentSpouseSection');
+        const currentSpouseTimesMarriedInput = document.getElementById('current_spouse_times_married');
+        const currentSpouseTimesMarriedError = document.getElementById('current_spouse_times_married_error');
+        const currentSpouseANumberInput = document.getElementById('current_spouse_a_number');
+        const currentSpouseANumberError = document.getElementById('current_spouse_a_number_error');
+        const selfPriorSpouseSection = document.getElementById('selfPriorSpouseSection');
+        const saveConfirmation = document.getElementById('saveConfirmation');
+
+        // Buttons for adding prior spouses
+        const addSelfPriorSpouseBtn = document.getElementById('addSelfPriorSpouseBtn');
+        const addCurrentSpousePriorSpouseBtn = document.getElementById('addCurrentSpousePriorSpouseBtn');
+
+
+        // Birth Name related elements
+        const hasDifferentBirthNameRadios = document.querySelectorAll('input[name="has_different_birth_name"]');
+        const birthNameSection = document.getElementById('birthNameSection');
+        const birthFirstNameInput = document.getElementById('birth_first_name');
+        const birthMiddleNameInput = document = document.getElementById('birth_middle_name');
+        const birthLastNameInput = document.getElementById('birth_last_name');
+
+        const firstNameInput = document.getElementById('first_name');
+        const middleNameInput = document.getElementById('middle_name');
+        const lastNameInput = document.getElementById('last_name');
+
+        // Other Names related elements
+        const hasOtherNamesRadios = document.querySelectorAll('input[name="has_other_names"]');
+        const otherNamesSection = document.getElementById('otherNamesSection');
+        const otherFirstName1Input = document.getElementById('other_first_name1');
+        const otherMiddleName1Input = document = document.getElementById('other_middle_name1');
+        const otherLastName1Input = document.getElementById('other_last_name1');
+        const otherFirstName2Input = document.getElementById('other_first_name2');
+        const otherMiddleName2Input = document.getElementById('other_middle_name2');
+        const otherLastName2Input = document.getElementById('other_last_name2');
+
+
+        // Define all possible fields, including those in multi-entry blocks
+        const allFields = [
+            // Personal Information (Step 1)
+            { name: 'first_name', type: 'string' },
+            { name: 'middle_name', type: 'string' },
+            { name: 'last_name', type: 'string' },
+            { name: 'birth_first_name', type: 'string' },
+            { name: 'birth_middle_name', type: 'string' },
+            { name: 'birth_last_name', type: 'string' },
+            { name: 'other_first_name1', type: 'string' },
+            { name: 'other_middle_name1', type: 'string' },
+            { name: 'other_last_name1', type: 'string' },
+            { name: 'other_first_name2', type: 'string' },
+            { name: 'other_middle_name2', type: 'string' },
+            { name: 'other_last_name2', type: 'string' },
+            { name: 'date_of_birth', type: 'date' },
+            { name: 'gender', type: 'string' },
+            { name: 'marital_status', type: 'string' },
+            { name: 'fax_number', type: 'string' },
+            { name: 'mobile_phone_number', type: 'string' },
+            { name: 'evening_phone_number', type: 'string' }, 
+            { name: 'work_phone_number', type: 'string' },     
+            { name: 'ethnicity', type: 'string' },
+            { name: 'hair_color', type: 'string' },
+            { name: 'eye_color', type: 'string' },
+            { name: 'race_white', type: 'boolean' },
+            { name: 'race_asian', type: 'boolean' },
+            { name: 'race_black', type: 'boolean' },
+            { name: 'race_american_indian', type: 'boolean' },
+            { name: 'race_native_hawaiian', type: 'boolean' },
+            { name: 'country_of_birth', type: 'string' },
+            { name: 'country_of_nationality', type: 'string' },
+            { name: 'citizenship_country', type: 'string' },
+
+            // Professional & Education Information
+            { name: 'employer_or_school_1_name', type: 'string' },
+            { name: 'employer_or_school_1_address_street', type: 'string' },
+            { name: 'employer_or_school_1_address_extra', type: 'string' },
+            { name: 'employer_or_school_1_address_number', type: 'string' },
+            { name: 'employer_or_school_1_address_city', type: 'string' },
+            { name: 'employer_or_school_1_address_state', type: 'string' },
+            { name: 'employer_or_school_1_address_zip_code', type: 'string' },
+            { name: 'employer_or_school_1_address_zip_4', type: 'string' },
+            { name: 'employer_or_school_1_address_province', type: 'string' },
+            { name: 'employer_or_school_1_address_postal_code', type: 'string' },
+            { name: 'employer_or_school_1_address_country', type: 'string' },
+            { name: 'employer_or_school_1_address_start_date', type: 'date' },
+            { name: 'employer_or_school_1_address_end_date', type: 'date' },
+            { name: 'employer_or_school_1_occupation', type: 'string' },
+
+            { name: 'employer_or_school_2_name', type: 'string' },
+            { name: 'employer_or_school_2_address_street', type: 'string' },
+            { name: 'employer_or_school_2_address_extra', type: 'string' },
+            { name: 'employer_or_school_2_address_number', type: 'string' },
+            { name: 'employer_or_school_2_address_city', type: 'string' },
+            { name: 'employer_or_school_2_address_state', type: 'string' },
+            { name: 'employer_or_school_2_address_zip_code', type: 'string' },
+            { name: 'employer_or_school_2_address_zip_4', type: 'string' },
+            { name: 'employer_or_school_2_address_province', type: 'string' },
+            { name: 'employer_or_school_2_address_postal_code', type: 'string' },
+            { name: 'employer_or_school_2_address_country', type: 'string' },
+            { name: 'employer_or_school_2_address_start_date', type: 'date' },
+            { name: 'employer_or_school_2_address_end_date', type: 'date' },
+            { name: 'employer_or_school_2_occupation', type: 'string' },
+
+            { name: 'employer_or_school_3_name', type: 'string' },
+            { name: 'employer_or_school_3_address_street', type: 'string' },
+            { name: 'employer_or_school_3_address_extra', type: 'string' },
+            { name: 'employer_or_school_3_address_number', type: 'string' },
+            { name: 'employer_or_school_3_address_city', type: 'string' },
+            { name: 'employer_or_school_3_address_state', type: 'string' },
+            { name: 'employer_or_school_3_address_zip_code', type: 'string' },
+            { name: 'employer_or_school_3_address_zip_4', type: 'string' },
+            { name: 'employer_or_school_3_address_province', type: 'string' },
+            { name: 'employer_or_school_3_address_postal_code', type: 'string' },
+            { name: 'employer_or_school_3_address_country', type: 'string' },
+            { name: 'employer_or_school_3_address_start_date', type: 'date' },
+            { name: 'employer_or_school_3_address_end_date', type: 'date' },
+            { name: 'employer_or_school_3_occupation', type: 'string' },
+
+            // Marital & Spouse's Personal Information
+            { name: 'times_married', type: 'number' },
+            { name: 'current_spouse_last_name', type: 'string' },
+            { name: 'current_spouse_middle_name', type: 'string' },
+            { name: 'current_spouse_first_name', type: 'string' },
+            { name: 'current_spouse_previous_last_name', type: 'string' },
+            { name: 'current_spouse_previous_middle_name', type: 'string' },
+            { name: 'current_spouse_previous_first_name', type: 'string' },
+            { name: 'current_spouse_other_last_name', type: 'string' },
+            { name: 'current_spouse_other_middle_name', type: 'string' },
+            { name: 'current_spouse_other_first_name', type: 'string' },
+            { name: 'current_spouse_date_of_birth', type: 'date' },
+            { name: 'current_spouse_marriage_date', type: 'date' },
+            { name: 'current_spouse_address_street', type: 'string' },
+            { name: 'current_spouse_address_extra', type: 'string' },
+            { name: 'current_spouse_address_number', type: 'string' },
+            { name: 'current_spouse_address_city', type: 'string' },
+            { name: 'current_spouse_address_county', type: 'string' },
+            { name: 'current_spouse_address_state', type: 'string' },
+            { name: 'current_spouse_address_zip_code', type: 'string' },
+            { name: 'current_spouse_address_province', type: 'string' },
+            { name: 'current_spouse_address_postal_code', type: 'string' },
+            { name: 'current_spouse_address_country', type: 'string' },
+            { name: 'current_spouse_employer', type: 'string' },
+            { name: 'current_spouse_citizen', type: 'boolean' },
+            { name: 'current_spouse_citizen_at_birth', type: 'boolean' },
+            { name: 'current_spouse_date_became_citizen', type: 'date' },
+            { name: 'current_spouse_country_of_citizenship', type: 'string' },
+            { name: 'current_spouse_a_number', type: 'string' }, // String as per prompt
+            { name: 'current_spouse_lawful_permanent_resident', type: 'boolean' },
+            { name: 'current_spouse_immigration_status_other', type: 'string' },
+            { name: 'current_spouse_times_married', type: 'number' },
+            { name: 'current_spouse_marriage_address_city', type: 'string' },
+            { name: 'current_spouse_marriage_address_state', type: 'string' },
+            { name: 'current_spouse_marriage_address_province', type: 'string' },
+            { name: 'current_spouse_marriage_address_country', type: 'string' },
+
+            // Multi-entry: Current Spouse's Prior Spouses
+            // These will be collected dynamically, define their base names here for completeness
+            { name: 'current_spouse_prior_spouse_first_name', type: 'string', isMulti: true },
+            { name: 'current_spouse_prior_spouse_middle_name', type: 'string', isMulti: true },
+            { name: 'current_spouse_prior_spouse_last_name', type: 'string', isMulti: true },
+            { name: 'current_spouse_prior_spouse_citizen', type: 'boolean', isMulti: true },
+            { name: 'current_spouse_prior_spouse_lawful_permanent_resident', type: 'boolean', isMulti: true },
+            { name: 'current_spouse_prior_spouse_immigration_status_other', type: 'string', isMulti: true },
+            { name: 'current_spouse_prior_spouse_date_of_birth', type: 'date', isMulti: true },
+            { name: 'current_spouse_prior_spouse_country_of_birth', type: 'string', isMulti: true },
+            { name: 'current_spouse_prior_spouse_country_of_citizenship', type: 'string', isMulti: true },
+            { name: 'current_spouse_prior_spouse_date_of_marriage', type: 'date', isMulti: true },
+            { name: 'current_spouse_prior_spouse_end_date_of_marriage', type: 'date', isMulti: true },
+            { name: 'current_spouse_prior_spouse_annuled', type: 'boolean', isMulti: true },
+            { name: 'current_spouse_prior_spouse_divorced', type: 'boolean', isMulti: true },
+            { name: 'current_spouse_prior_spouse_deceased', type: 'boolean', isMulti: true },
+            { name: 'current_spouse_prior_spouse_marriage_end_other', type: 'string', isMulti: true },
+
+            // Multi-entry: Self's Prior Spouses
+            { name: 'prior_spouse_first_name', type: 'string', isMulti: true },
+            { name: 'prior_spouse_middle_name', type: 'string', isMulti: true },
+            { name: 'prior_spouse_last_name', type: 'string', isMulti: true },
+            { name: 'prior_spouse_citizen', type: 'boolean', isMulti: true },
+            { name: 'prior_spouse_lawful_permanent_resident', type: 'boolean', isMulti: true },
+            { name: 'prior_spouse_immigration_status_other', type: 'string', isMulti: true },
+            { name: 'prior_spouse_date_of_birth', type: 'date', isMulti: true },
+            { name: 'prior_spouse_country_of_birth', type: 'string', isMulti: true },
+            { name: 'prior_spouse_country_of_citizenship', type: 'string', isMulti: true },
+            { name: 'prior_spouse_date_of_marriage', type: 'date', isMulti: true },
+            { name: 'prior_spouse_end_date_of_marriage', type: 'date', isMulti: true },
+            { name: 'prior_spouse_annuled', type: 'boolean', isMulti: true },
+            { name: 'prior_spouse_divorced', type: 'boolean', isMulti: true },
+            { name: 'prior_spouse_deceased', type: 'boolean', isMulti: true },
+            { name: 'prior_spouse_marriage_end_other', type: 'string', isMulti: true },
+        ];
+
+
+        function updateProgress() {
+            const progress = ((currentStep + 1) / numSteps) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        function showStep(index) {
+            steps.forEach((step, i) => {
+                step.classList.toggle('active', i === index);
+            });
+            updateProgress();
+            // Trigger marital status visibility update whenever a step is shown, especially on navigation back/forth
+            if (index === 1) { // Now Step 2 (originally Step 3), which contains marital info
+                updateMaritalStatusVisibility();
+            }
+            if (index === 0) { // Step 1, which contains birth name info
+                updateBirthNameVisibilityAndValue();
+                updateOtherNamesVisibilityAndValue(); 
+            }
+        }
+
+        /**
+         * Resets the value of an input field based on its type to a "null" equivalent.
+         * For text/date inputs, it sets value to empty string/0000-00-00.
+         * For radioes, it unchecks them.
+         * For number inputs, it sets value to 0.
+         * @param {HTMLElement} input - The input element to reset.
+         * @param {string} type - The data type of the field ('string', 'date', 'boolean', 'number').
+         */
+        function resetInputField(input, type) {
+            if (!input) return; // Guard clause if input doesn't exist
+
+            if (type === 'boolean') {
+                input.checked = false;
+            } else if (type === 'date') {
+                input.value = '0000-00-00';
+            } else if (type === 'number') {
+                input.value = '0';
+            } else { // 'string'
+                input.value = '';
+            }
+        }
+
+        function collectFormData() {
+            const formData = {};
+
+            // Initialize all fields from the list with a default empty value
+            allFields.forEach(field => {
+                if (field.type === 'boolean') {
+                    formData[field.name] = false;
+                } else if (field.type === 'number') {
+                    formData[field.name] = 0;
+                } else {
+                    formData[field.name] = '';
+                }
+            });
+
+            // Populate formData with values from the form inputs
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                const name = input.name;
+                // Handle radio groups explicitly
+                if (name === 'has_different_birth_name' || name === 'has_other_names') {
+                    if (input.checked) {
+                        formData[name] = input.value;
+                    }
+                } else if (name && formData.hasOwnProperty(name)) { // Check if name is in our defined fields
+                    if (input.type === 'radio') {
+                         formData[name] = input.checked;
+                    } else if (input.type === 'number') {
+                         formData[name] = input.value === '' ? 0 : parseInt(input.value); 
+                    }
+                    else {
+                         formData[name] = input.value;
+                    }
+                }
+            });
+
+            // Helper to set a field to its "null" equivalent based on type for JSON output
+            const setFieldToNullEquivalentInFormData = (fieldName, fieldType) => {
+                if (fieldType === 'string') {
+                    formData[fieldName] = "null";
+                } else if (fieldType === 'date') {
+                    formData[fieldName] = "0000-00-00";
+                } else if (fieldType === 'boolean') {
+                    formData[fieldName] = false;
+                } else if (fieldType === 'number') {
+                    formData[fieldName] = 0;
+                }
+            };
+
+            // --- Conditional logic for "Other Names" in collected data ---
+            if (document.querySelector('input[name="has_other_names"]:checked').value === 'no') {
+                setFieldToNullEquivalentInFormData('other_first_name1', 'string');
+                setFieldToNullEquivalentInFormData('other_middle_name1', 'string');
+                setFieldToNullEquivalentInFormData('other_last_name1', 'string');
+                setFieldToNullEquivalentInFormData('other_first_name2', 'string');
+                setFieldToNullEquivalentInFormData('other_middle_name2', 'string');
+                setFieldToNullEquivalentInFormData('other_last_name2', 'string');
+            }
+
+            // --- Conditional logic for Marital and Spouse Information in collected data ---
+            const maritalStatus = formData.marital_status;
+            const timesMarried = parseInt(formData.times_married);
+
+            // If marital status is single, times_married should be 0, and all spouse/prior spouse info should be nullified
+            if (maritalStatus === 'single') {
+                formData.times_married = 0; // Explicitly set user's times_married to 0
+                allFields.filter(field => field.name.startsWith('current_spouse') && !field.isMulti)
+                         .forEach(field => setFieldToNullEquivalentInFormData(field.name, field.type));
+                formData.current_spouse_prior_spouses = []; // Empty array for current spouse's prior spouses
+                formData.prior_spouses = []; // Empty array for self's prior spouses
+            } 
+            // If married, but only married once, nullify prior spouses (both self and current spouse's)
+            else if (maritalStatus === 'married' && timesMarried === 1) {
+                formData.prior_spouses = []; // Empty array for self's prior spouses
+                formData.current_spouse_prior_spouses = []; // Empty array for current spouse's prior spouses
+            }
+            // If divorced, widowed, or annulled, nullify current spouse info, but keep self's prior spouses
+            else if (maritalStatus !== 'married' && maritalStatus !== 'single') { // divorced, widowed, annulled
+                allFields.filter(field => field.name.startsWith('current_spouse') && !field.isMulti)
+                         .forEach(field => setFieldToNullEquivalentInFormData(field.name, field.type));
+                formData.current_spouse_prior_spouses = []; // Empty array for current spouse's prior spouses
+            }
+
+            // Handle multi-entry fields explicitly based on actual blocks present.
+            const multiEntryDefinitions = {
+                'current_spouse_prior_spouses': [
+                    'current_spouse_prior_spouse_first_name', 'current_spouse_prior_spouse_middle_name', 'current_spouse_prior_spouse_last_name',
+                    'current_spouse_prior_spouse_citizen', 'current_spouse_prior_spouse_lawful_permanent_resident', 'current_spouse_prior_spouse_immigration_status_other',
+                    'current_spouse_prior_spouse_date_of_birth', 'current_spouse_prior_spouse_country_of_birth', 'current_spouse_prior_spouse_country_of_citizenship', 'current_spouse_prior_spouse_date_of_marriage', 'current_spouse_prior_spouse_end_date_of_marriage',
+                    'current_spouse_prior_spouse_annuled', 'current_spouse_prior_spouse_divorced', 'current_spouse_prior_spouse_deceased', 'current_spouse_prior_spouse_marriage_end_other'
+                ],
+                'prior_spouses': [
+                    'prior_spouse_first_name', 'prior_spouse_middle_name', 'prior_spouse_last_name',
+                    'prior_spouse_citizen', 'prior_spouse_lawful_permanent_resident', 'prior_spouse_immigration_status_other',
+                    'prior_spouse_date_of_birth', 'prior_spouse_country_of_birth', 'prior_spouse_country_of_citizenship', 'prior_spouse_date_of_marriage', 'prior_spouse_end_date_of_marriage',
+                    'prior_spouse_annuled', 'prior_spouse_divorced', 'prior_spouse_deceased', 'prior_spouse_marriage_end_other'
+                ]
+            };
+            
+            for (const key in multiEntryDefinitions) {
+                const blockContainer = document.getElementById(key + 'Blocks');
+                const blockDataArray = [];
+
+                // Check if the block container is visible. If not, the array should be empty.
+                if (blockContainer && !blockContainer.classList.contains('hidden')) {
+                    const blocks = blockContainer.querySelectorAll('.multi-entry-block');
+                    blocks.forEach(block => {
+                        const blockData = {};
+                        const index = block.dataset.index;
+                        multiEntryDefinitions[key].forEach(fieldBaseName => {
+                            const inputName = `${fieldBaseName}_${index}`;
+                            const input = block.querySelector(`[name="${inputName}"]`);
+                            const fieldDef = allFields.find(f => f.name === fieldBaseName && f.isMulti);
+                            
+                            if (input) {
+                                if (input.type === 'radio') {
+                                    blockData[fieldBaseName] = input.checked;
+                                } else if (input.type === 'number') {
+                                    blockData[fieldBaseName] = input.value === '' ? 0 : parseInt(input.value);
+                                } else {
+                                    blockData[fieldBaseName] = input.value;
+                                }
+                            } else {
+                                // If input doesn't exist for some reason, ensure it's nulled
+                                setFieldToNullEquivalentInFormData(fieldBaseName, fieldDef.type); 
+                            }
+                        });
+                        blockDataArray.push(blockData);
+                    });
+                }
+                formData[key] = blockDataArray;
+            }
+
+            return formData;
+        }
+
+        function handleReview() {
+            const data = collectFormData();
+            reviewData.textContent = JSON.stringify(data, null, 2);
+        }
+        
+        // Prevent form submission on 'Enter' key press
+        form.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                e.preventDefault();
+            }
+        });
+
+        // Validation logic for Step 3
+        function validateStep3() {
+            let isValid = true;
+            const maritalStatus = maritalStatusSelect.value;
+            const timesMarried = parseInt(timesMarriedInput.value) || 0; // Use 0 if empty
+
+            // Condition: times_married can't be "0" if marital_status is not "Single"
+            if (maritalStatus !== 'single' && (isNaN(timesMarried) || timesMarried === 0)) {
+                timesMarriedError.textContent = "Times married cannot be 0 if your marital status is not single.";
+                timesMarriedError.classList.remove('hidden');
+                isValid = false;
+            } else {
+                timesMarriedError.classList.add('hidden');
+            }
+
+            // Condition: current_spouse_a_number validation (only if married)
+            if (maritalStatus === 'married' && (currentSpouseSection.classList.contains('active') || !currentSpouseSection.classList.contains('hidden'))) { // Ensure validation only if current spouse section is visible
+                const aNumberValue = currentSpouseANumberInput.value.trim();
+                if (timesMarried === 1) {
+                    if (aNumberValue !== '1') {
+                        currentSpouseANumberError.textContent = "A-Number must be '1' if you've been married once.";
+                        currentSpouseANumberError.classList.remove('hidden');
+                        isValid = false;
+                    } else {
+                        currentSpouseANumberError.classList.add('hidden');
+                    }
+                } else if (timesMarried > 1) {
+                    const parsedANumber = parseInt(aNumberValue);
+                    if (isNaN(parsedANumber) || parsedANumber <= 1) {
+                        currentSpouseANumberError.textContent = "A-Number must be a number greater than 1 if you've been married more than once.";
+                        currentSpouseANumberError.classList.remove('hidden');
+                        isValid = false;
+                    } else {
+                        currentSpouseANumberError.classList.add('hidden');
+                    }
+                }
+                if (aNumberValue === '' && maritalStatus === 'married') {
+                     currentSpouseANumberError.textContent = "A-Number is required if you are married.";
+                     currentSpouseANumberError.classList.remove('hidden');
+                     isValid = false;
+                }
+            } else {
+                currentSpouseANumberError.classList.add('hidden'); // Hide if not married or section not active
+            }
+
+            // Condition: current_spouse_times_married can't be "0" and defaults to "1" (only if married)
+            if (maritalStatus === 'married' && (currentSpouseSection.classList.contains('active') || !currentSpouseSection.classList.contains('hidden'))) { // Ensure validation only if current spouse section is visible
+                if (isNaN(currentSpouseTimesMarriedInput.value) || parseInt(currentSpouseTimesMarriedInput.value) < 1) {
+                    currentSpouseTimesMarriedError.textContent = "Current spouse's times married must be at least 1.";
+                    currentSpouseTimesMarriedError.classList.remove('hidden');
+                    isValid = false;
+                } else {
+                    currentSpouseTimesMarriedError.classList.add('hidden');
+                }
+            } else {
+                currentSpouseTimesMarriedError.classList.add('hidden'); // Hide if not married or section not active
+            }
+
+            return isValid;
+        }
+
+
+        // Event listener for Next/Previous buttons
+        form.addEventListener('click', (e) => {
+            if (e.target.classList.contains('next')) {
+                const currentStepElement = steps[currentStep];
+                // Only validate required fields that are currently visible and not disabled
+                const requiredInputs = currentStepElement.querySelectorAll('[required]:not([disabled]):not(.hidden *)'); 
+                let isStepValid = true;
+
+                requiredInputs.forEach(input => {
+                    if (!input.checkValidity()) {
+                        isStepValid = false;
+                        input.reportValidity();
+                    }
+                });
+
+                // Additional validation for specific steps
+                if (currentStep === 1) { // Step 2, which contains Marital Info
+                    if (!validateStep3()) { // Still calling validateStep3 as the function logic is the same
+                        isStepValid = false;
+                    }
+                }
+
+                if (isStepValid) {
+                    currentStep++;
+                    if (currentStep >= numSteps) {
+                        currentStep = numSteps - 1;
+                    }
+                    showStep(currentStep);
+                    if (currentStep === numSteps - 1) {
+                        handleReview();
+                    }
+                }
+            } else if (e.target.classList.contains('prev')) {
+                currentStep--;
+                if (currentStep < 0) currentStep = 0;
+                showStep(currentStep);
+            }
+        });
+
+        // Event listener for form submission (Save as JSON)
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const data = collectFormData();
+            const jsonString = JSON.stringify(data, null, 2);
+
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'user_data.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            // Show confirmation message
+            saveConfirmation.classList.remove('hidden');
+            setTimeout(() => {
+                saveConfirmation.classList.add('hidden');
+            }, 3000); // Hide after 3 seconds
+        });
+
+        /**
+         * Clears all input fields within a given container and sets multi-entry blocks to default.
+         * This ensures data from hidden/skipped sections doesn't persist in the UI if the user navigates back.
+         * @param {HTMLElement} container - The DOM element containing the fields to clear.
+         * @param {Array<Object>} fieldsToConsider - An array of field definitions relevant to the container.
+         */
+        function clearAndResetFieldsInContainer(container, fieldsToConsider) {
+            if (!container) return;
+
+            // Clear single input fields
+            container.querySelectorAll('input:not([type="radio"]):not([type="radio"]), select, textarea').forEach(input => {
+                input.value = '';
+            });
+            container.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.checked = false;
+            });
+            container.querySelectorAll('input[type="radio"]').forEach(radio => {
+                // For radio buttons, uncheck them unless they are the default "no" for has_different_birth_name/has_other_names
+                if (radio.name === 'has_different_birth_name' || radio.name === 'has_other_names') {
+                    if (radio.value === 'no') {
+                        radio.checked = true; // Set default to 'no'
+                    } else {
+                        radio.checked = false;
+                    }
+                } else {
+                     radio.checked = false;
+                }
+            });
+
+
+            // Reset multi-entry blocks to one instance and clear their fields
+            const multiEntryContainers = container.querySelectorAll('[data-multi-entry]');
+            multiEntryContainers.forEach(multiContainer => {
+                const blockId = multiContainer.dataset.multiEntry;
+                const blocks = multiContainer.querySelectorAll(`[data-multi-entry="${blockId}"]`);
+                // Remove all but the first block
+                for (let i = blocks.length - 1; i > 0; i--) {
+                    blocks[i].remove();
+                }
+                // Reset the first block's fields and re-hide its remove button
+                if (blocks[0]) {
+                    blocks[0].dataset.index = 1;
+                    const h5Element = blocks[0].querySelector('h5');
+                    const labelPrefix = multiContainer.querySelector('.add-more-btn')?.getAttribute('data-label-prefix') || 'Item';
+                    const labelSuffix = multiContainer.querySelector('.add-more-btn')?.getAttribute('data-label-suffix') || '';
+                    if (h5Element) {
+                        h5Element.textContent = `${labelPrefix} #1 ${labelSuffix}`;
+                    }
+                    blocks[0].querySelectorAll('input, select, textarea').forEach(input => {
+                        const fieldDef = fieldsToConsider.find(f => input.name.startsWith(f.name) && f.isMulti);
+                        if (fieldDef) {
+                            resetInputField(input, fieldDef.type);
+                        } else {
+                            // Fallback for non-multi fields within a multi-entry block if any
+                            if (input.type === 'radio') input.checked = false;
+                            else input.value = '';
+                        }
+                    });
+                    const removeBtn = blocks[0].querySelector('.remove-btn');
+                    if (removeBtn) removeBtn.classList.add('hidden');
+                }
+            });
+        }
+
+
+        // Conditional display logic for marital status
+        function updateMaritalStatusVisibility() {
+            const status = maritalStatusSelect.value;
+            // Get current values from the UI input fields
+            const userTimesMarried = parseInt(timesMarriedInput.value) || 0; 
+            const currentSpouseTimesMarried = parseInt(currentSpouseTimesMarriedInput.value) || 0; // New variable for clarity
+
+            // --- Step 0: Conditional Clearing of fields BEFORE visibility changes ---
+            // These should happen if a section is currently visible AND will become hidden
+            // To ensure data is properly cleared if the UI changes state.
+
+            // Clear current spouse section fields if it's visible and will become hidden
+            if (!currentSpouseSection.classList.contains('hidden') && status !== 'married') {
+                clearAndResetFieldsInContainer(currentSpouseSection, allFields.filter(f => f.name.startsWith('current_spouse') && !f.isMulti));
+            }
+
+            // Clear self prior spouse section fields if it's visible and will become hidden
+            // This happens if changing to 'single', or to 'married' with userTimesMarried <= 1
+            if (!selfPriorSpouseSection.classList.contains('hidden') && (status === 'single' || (status === 'married' && userTimesMarried <= 1))) {
+                 clearAndResetFieldsInContainer(selfPriorSpouseSection, allFields.filter(f => f.name.startsWith('prior_spouse') && f.isMulti));
+            }
+
+            // Clear current spouse prior spouse blocks if visible and will become hidden
+            // This happens if changing to 'single' or non-married, or to 'married' with currentSpouseTimesMarried <= 1
+            if (!document.getElementById('currentSpousePriorSpouseBlocks').classList.contains('hidden') && (status !== 'married' || currentSpouseTimesMarried <= 1)) {
+                 clearAndResetFieldsInContainer(document.getElementById('currentSpousePriorSpouseBlocks'), allFields.filter(f => f.name.startsWith('current_spouse_prior_spouse') && f.isMulti));
+            }
+
+
+            // --- Step 1: Hide all relevant sections and add buttons by default for a clean slate ---
+            // This ensures sections are hidden if the new status doesn't warrant them.
+            maritalInfoSection.classList.add('hidden');
+            currentSpouseSection.classList.add('hidden');
+            selfPriorSpouseSection.classList.add('hidden');
+            document.getElementById('currentSpousePriorSpouseBlocks').classList.add('hidden');
+
+            // Hide add buttons by default
+            addSelfPriorSpouseBtn.classList.add('hidden');
+            addCurrentSpousePriorSpouseBtn.classList.add('hidden');
+
+            // --- Step 2: Apply specific UI visibility logic and set defaults based on current marital status ---
+            if (status === 'single') {
+                timesMarriedInput.value = '0'; // Force "Times Married" to 0 for Single
+                timesMarriedInput.disabled = true; // Disable input for "Times Married"
+            } else {
+                maritalInfoSection.classList.remove('hidden'); // Show the main marital info section container
+                timesMarriedInput.disabled = false; // Enable "Times Married" input if not single
+
+                // Determine the expected number of *prior* spouse blocks for the user
+                let expectedUserPriorSpouses = 0;
+                if (status === 'married') {
+                    expectedUserPriorSpouses = Math.max(0, userTimesMarried - 1);
+                } else { // divorced, widowed, annulled
+                    expectedUserPriorSpouses = userTimesMarried; // 'Times Married' here is total marriages, which for non-current means all are prior
+                }
+
+                // Logic for User's Prior Spouses (selfPriorSpouseSection)
+                if (expectedUserPriorSpouses > 0) {
+                    selfPriorSpouseSection.classList.remove('hidden');
+                    // Get the current number of actual prior spouse blocks for the user
+                    const currentSelfPriorSpouseBlocks = selfPriorSpouseSection.querySelectorAll('[data-multi-entry="prior_spouses"]').length;
+                    
+                    // Show 'Add another Prior Spouse' button if more blocks are expected than currently exist
+                    if (currentSelfPriorSpouseBlocks < expectedUserPriorSpouses) {
+                        addSelfPriorSpouseBtn.classList.remove('hidden');
+                    }
+                } else {
+                    selfPriorSpouseSection.classList.add('hidden'); 
+                }
+
+
+                if (status === 'married') {
+                    currentSpouseSection.classList.remove('hidden'); // Show current spouse info
+
+                    // Set default A-Number if User's Times Married is 1
+                    if (userTimesMarried === 1) {
+                        if (currentSpouseANumberInput.value === '' || currentSpouseANumberInput.value !== '1') {
+                            currentSpouseANumberInput.value = '1';
+                        }
+                    } else { // If userTimesMarried > 1, A-Number can be other values, don't force to '1'
+                         if (currentSpouseANumberInput.value === '') {
+                             currentSpouseANumberInput.value = '';
+                         }
+                    }
+
+                    // Ensure current spouse's times married defaults to at least 1 for married status
+                    if (currentSpouseTimesMarriedInput.value === '' || parseInt(currentSpouseTimesMarriedInput.value) < 1) {
+                        currentSpouseTimesMarriedInput.value = '1';
+                    }
+
+                    // Determine the expected number of *prior* spouse blocks for the current spouse
+                    let expectedCurrentSpousePriorSpouses = Math.max(0, currentSpouseTimesMarried - 1);
+
+                    // Logic for Current Spouse's Prior Spouses (currentSpousePriorSpouseBlocks)
+                    if (expectedCurrentSpousePriorSpouses > 0) {
+                        document.getElementById('currentSpousePriorSpouseBlocks').classList.remove('hidden');
+                        // Get the current number of actual prior spouse blocks for the current spouse
+                        const currentCurrentSpousePriorSpouseBlocks = document.getElementById('currentSpousePriorSpouseBlocks').querySelectorAll('[data-multi-entry="current_spouse_prior_spouses"]').length;
+
+                        // Show 'Add prior spouse' button if more blocks are expected than currently exist
+                        if (currentCurrentSpousePriorSpouseBlocks < expectedCurrentSpousePriorSpouses) {
+                            addCurrentSpousePriorSpouseBtn.classList.remove('hidden');
+                        }
+                    } else {
+                         document.getElementById('currentSpousePriorSpouseBlocks').classList.add('hidden');
+                    }
+
+                } else if (status === 'divorced' || status === 'widowed' || status === 'annulled') {
+                    // For divorced/widowed/annulled, selfPriorSpouseSection is already handled above.
+                    // currentSpouseSection should be hidden for these statuses, as there is no *current* spouse.
+                    currentSpouseSection.classList.add('hidden');
+                    
+                    const firstPriorSpouseBlock = selfPriorSpouseSection.querySelector('[data-multi-entry="prior_spouses"]');
+                    if (firstPriorSpouseBlock) {
+                        // Clear all relevant radioes before setting the correct one for the first block
+                        firstPriorSpouseBlock.querySelectorAll('.prior-spouse-annuled, .prior-spouse-divorced, .prior-spouse-deceased').forEach(cb => cb.checked = false);
+
+                        if (status === 'divorced') {
+                            const divorcedCb = firstPriorSpouseBlock.querySelector('.prior-spouse-divorced');
+                            if (divorcedCb) divorcedCb.checked = true;
+                        } else if (status === 'widowed') {
+                            const deceasedCb = firstPriorSpouseBlock.querySelector('.prior-spouse-deceased');
+                            if (deceasedCb) deceasedCb.checked = true;
+                        } else if (status === 'annulled') {
+                            const annulledCb = firstPriorSpouseBlock.querySelector('.prior-spouse-annuled');
+                            if (annulledCb) annulledCb.checked = true;
+                        }
+                    }
+                }
+            }
+            validateStep3();
+        }
+
+        maritalStatusSelect.addEventListener('change', updateMaritalStatusVisibility);
+        timesMarriedInput.addEventListener('input', updateMaritalStatusVisibility); 
+        currentSpouseANumberInput.addEventListener('input', validateStep3); 
+        currentSpouseTimesMarriedInput.addEventListener('input', updateMaritalStatusVisibility); 
+
+        // Birth Name conditional logic
+        function updateBirthNameVisibilityAndValue() {
+            const hasDifferentName = document.querySelector('input[name="has_different_birth_name"]:checked').value;
+
+            if (hasDifferentName === 'yes') {
+                birthNameSection.classList.remove('hidden');
+                birthFirstNameInput.value = '';
+                birthMiddleNameInput.value = '';
+                birthLastNameInput.value = '';
+                birthFirstNameInput.readOnly = false;
+                birthMiddleNameInput.readOnly = false;
+                birthLastNameInput.readOnly = false;
+            } else {
+                birthNameSection.classList.add('hidden');
+                // Auto-fill with current name and make read-only
+                birthFirstNameInput.value = firstNameInput.value;
+                birthMiddleNameInput.value = middleNameInput.value;
+                birthLastNameInput.value = lastNameInput.value;
+                birthFirstNameInput.readOnly = true;
+                birthMiddleNameInput.readOnly = true;
+                birthLastNameInput.readOnly = true;
+            }
+        }
+
+        // Other Names conditional logic
+        function updateOtherNamesVisibilityAndValue() {
+            const hasOtherNames = document.querySelector('input[name="has_other_names"]:checked').value;
+
+            if (hasOtherNames === 'yes') {
+                otherNamesSection.classList.remove('hidden');
+                // Clear values when shown
+                otherFirstName1Input.value = '';
+                otherMiddleName1Input.value = '';
+                otherLastName1Input.value = '';
+                otherFirstName2Input.value = '';
+                otherMiddleName2Input.value = '';
+                otherLastName2Input.value = '';
+            } else {
+                otherNamesSection.classList.add('hidden');
+                // Values will be set to "null" by collectFormData() if hidden
+            }
+        }
+
+
+        // Add event listeners for birth name radio buttons
+        hasDifferentBirthNameRadios.forEach(radio => {
+            radio.addEventListener('change', updateBirthNameVisibilityAndValue);
+        });
+
+        // Add event listeners to current name fields to update birth name if "same" is selected
+        firstNameInput.addEventListener('input', () => {
+            if (document.querySelector('input[name="has_different_birth_name"]:checked').value === 'no') {
+                birthFirstNameInput.value = firstNameInput.value;
+            }
+        });
+        middleNameInput.addEventListener('input', () => {
+            if (document.querySelector('input[name="has_different_birth_name"]:checked').value === 'no') {
+                birthMiddleNameInput.value = middleNameInput.value;
+            }
+        });
+        lastNameInput.addEventListener('input', () => {
+            if (document.querySelector('input[name="has_different_birth_name"]:checked').value === 'no') {
+                birthLastNameInput.value = lastNameInput.value;
+            }
+        });
+
+        // Add event listeners for other names radio buttons
+        hasOtherNamesRadios.forEach(radio => {
+            radio.addEventListener('change', updateOtherNamesVisibilityAndValue);
+        });
+
+
+        // Multi-entry block functionality (adapted for general use)
+        form.addEventListener('click', (e) => {
+            if (e.target.classList.contains('add-more-btn')) {
+                const targetId = e.target.getAttribute('data-target');
+                const blockId = e.target.getAttribute('data-block-id'); 
+                const blockTemplateId = e.target.getAttribute('data-block-template') || blockId; 
+                const labelPrefix = e.target.getAttribute('data-label-prefix') || 'Item';
+                const labelSuffix = e.target.getAttribute('data-label-suffix') || '';
+
+                const container = document.getElementById(targetId);
+                const blocks = container.querySelectorAll(`[data-multi-entry="${blockId}"]`);
+                const newIndex = blocks.length + 1;
+                
+                // Clone the first block of the specified type within the container
+                const firstBlock = container.querySelector(`[data-multi-entry="${blockId}"]`);
+                if (!firstBlock) return; 
+
+                const newBlock = firstBlock.cloneNode(true);
+                newBlock.dataset.index = newIndex;
+                const h5Element = newBlock.querySelector('h5');
+                if (h5Element) {
+                    h5Element.textContent = `${labelPrefix} #${newIndex} ${labelSuffix}`;
+                }
+                
+                newBlock.querySelectorAll('input, select').forEach(input => {
+                    // Extract base name, removing the last "_number" suffix
+                    const originalNameParts = input.name.split('_');
+                    originalNameParts.pop(); 
+                    const originalBaseName = originalNameParts.join('_');
+
+                    const newId = `${originalBaseName}_${newIndex}`;
+                    input.id = newId;
+                    input.name = newId;
+                    
+                    if (input.type === 'radio') {
+                        input.checked = false; 
+                    } else if (input.tagName === 'SELECT') {
+                        input.selectedIndex = 0; 
+                    } else {
+                        input.value = ''; 
+                    }
+                });
+
+                // Show remove button for the new block and potentially for the original if more than 1
+                const newRemoveBtn = newBlock.querySelector('.remove-btn');
+                if (newRemoveBtn) newRemoveBtn.classList.remove('hidden');
+
+                if (blocks.length === 1) { // If it was the first, show remove for the original now
+                    const originalRemoveBtn = firstBlock.querySelector('.remove-btn');
+                    if (originalRemoveBtn) originalRemoveBtn.classList.remove('hidden');
+                }
+                
+                container.appendChild(newBlock);
+
+                // For divorced/widowed/annulled, ensure the correct radio is checked in the newly added block
+                const maritalStatus = maritalStatusSelect.value;
+                if ((maritalStatus === 'divorced' || maritalStatus === 'widowed' || maritalStatus === 'annulled') && blockId === 'prior_spouses') {
+                    const newPriorSpouseBlock = newBlock; // This is the newly added block
+                    // Uncheck all related radioes first
+                    newPriorSpouseBlock.querySelectorAll('.prior-spouse-annuled, .prior-spouse-divorced, .prior-spouse-deceased').forEach(cb => cb.checked = false);
+
+                    if (maritalStatus === 'divorced') {
+                        const divorcedCb = newPriorSpouseBlock.querySelector('.prior-spouse-divorced');
+                        if (divorcedCb) divorcedCb.checked = true;
+                    } else if (maritalStatus === 'widowed') {
+                        const deceasedCb = newPriorSpouseBlock.querySelector('.prior-spouse-deceased');
+                        if (deceasedCb) deceasedCb.checked = true;
+                    } else if (maritalStatus === 'annulled') {
+                        const annulledCb = newPriorSpouseBlock.querySelector('.prior-spouse-annuled');
+                        if (annulledCb) annulledCb.checked = true;
+                    }
+                }
+                updateMaritalStatusVisibility(); // Re-evaluate button visibility after adding
+            } else if (e.target.classList.contains('remove-btn')) {
+                const blockToRemove = e.target.closest('.multi-entry-block');
+                if (blockToRemove) {
+                    const container = blockToRemove.parentNode;
+                    const blockId = blockToRemove.dataset.multiEntry; // Corrected from `dataset.multi-entry`
+                    blockToRemove.remove();
+
+                    // Re-index remaining blocks and update labels
+                    const remainingBlocks = container.querySelectorAll(`[data-multi-entry="${blockId}"]`);
+                    remainingBlocks.forEach((block, idx) => {
+                        const newIndex = idx + 1;
+                        block.dataset.index = newIndex;
+
+                        const labelPrefix = container.querySelector('.add-more-btn')?.getAttribute('data-label-prefix') || 'Item';
+                        const labelSuffix = container.querySelector('.add-more-btn')?.getAttribute('data-label-suffix') || '';
+                        const h5Element = block.querySelector('h5');
+                        if (h5Element) {
+                            h5Element.textContent = `${labelPrefix} #${newIndex} ${labelSuffix}`;
+                        }
+
+                        block.querySelectorAll('input, select').forEach(input => {
+                            const originalNameParts = input.name.split('_');
+                            originalNameParts.pop();
+                            const originalBaseName = originalNameParts.join('_');
+                            input.id = `${originalBaseName}_${newIndex}`;
+                            input.name = `${originalBaseName}_${newIndex}`;
+                        });
+                    });
+
+                    // If only one block remains, hide its remove button
+                    if (remainingBlocks.length === 1) {
+                        const singleRemoveBtn = remainingBlocks[0].querySelector('.remove-btn');
+                        if (singleRemoveBtn) singleRemoveBtn.classList.add('hidden');
+                    }
+                    updateMaritalStatusVisibility(); // Re-evaluate button visibility after removing
+                }
+            }
+        });
+
+        // Initial setup
+        showStep(currentStep);
+        updateMaritalStatusVisibility(); // Call on initial load to set visibility
+        updateBirthNameVisibilityAndValue(); // Call on initial load to set birth name section
+        updateOtherNamesVisibilityAndValue(); // Call on initial load to set other names section
+    </script>
+
+</body>
+</html>
